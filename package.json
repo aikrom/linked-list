@@ -1,0 +1,74 @@
+{
+  "name": "@aintts/linked-list",
+  "version": "0.0.1",
+  "author": "Ikrom Alizoda <ikrom.develop@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/aintts/linked-list#readme",
+  "keywords": [
+    "types",
+    "ts",
+    "typescript",
+    "list",
+    "linked-list"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aintts/linked-list.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aintts/linked-list/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/linked-list.esm.js",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test",
+    "test:watch": "tsdx test --watch",
+    "test:cov": "tsdx test --coverage",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^5.0.1",
+    "husky": "^7.0.0",
+    "size-limit": "^5.0.1",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "size-limit": [
+    {
+      "path": "dist/linked-list.cjs.production.min.js",
+      "limit": "1 KB"
+    },
+    {
+      "path": "dist/linked-list.esm.js",
+      "limit": "1 KB"
+    }
+  ]
+}
