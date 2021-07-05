@@ -65,6 +65,12 @@ and.append(dogs)
 console.log(tokens.join(' ') + '!') // => 'cats & dogs!'
 ```
 
+## Note
+
+> Do not modify the property of an item or list directly. This disrupts the work of 
+> the event-emitter. If you want to change a property directly, you can use `_dangerSet[PROPERTY]`, 
+> which will fire a single event instead of chaining events.
+
 ## API
 
 This package exports the following identifiers: `List`, `Item`.
@@ -328,50 +334,6 @@ item.list === null // => true
 ```
 
 The items parent list, and `null` otherwise.
-
-## Experimental Feature
-
-Observable list.
-
-```ts
-class ObservableList extends Observable<List, 'append' | 'prepend'>(List) {
-  public append(item: Item) {
-    const result = super.append(item);
-    this.notify('append');
-    return result;
-  }
-  public prepend(item: Item) {
-    const result = super.prepend(item);
-    this.notify('prepend');
-    return result;
-  }
-}
-
-const list = new ObservableList(1);
-
-list.listen((subject, reason) => console.log(subject, reason));
-```
-
-Observable item.
-
-```ts
-class ObservableItem extends Observable<Item, 'append' | 'prepend'>(Item) {
-  public append(item: ObservableItem) {
-    const result = super.append(item);
-    this.notify('append');
-    return result;
-  }
-  public prepend(item: ObservableItem) {
-    const result = super.prepend(item);
-    this.notify('prepend');
-    return result;
-  }
-}
-
-const item = new ObservableItem(1);
-
-item.listen((subject, reason) => console.log(subject, reason));
-```
 
 ## License
 

@@ -1,3 +1,4 @@
+import { EventEmitter } from '@aintts/event-emitter';
 import { Item } from './item';
 import { Iterator } from './iterator';
 
@@ -5,6 +6,14 @@ export class List<T extends Item = Item> {
   public head: T | null = null;
   public tail: T | null = null;
   public size = 0;
+
+  public event = new EventEmitter<{
+    'change-head': (list: List<T>) => void;
+    'change-tail': (list: List<T>) => void;
+    'change-size': (size: number, list: List<T>) => void;
+    append: (item: T | null, tail: T | null, list: List<T>) => void;
+    prepend: (item: T | null, head: T | null, list: List<T>) => void;
+  }>(['change-head', 'change-tail', 'change-size', 'append', 'prepend']);
 
   static of<R extends Item = Item>(...items: R[]) {
     return appendAll<R>(new this(), items);
@@ -30,7 +39,22 @@ export class List<T extends Item = Item> {
     return result;
   }
 
-  prepend(item: Item) {
+  _dangerSetHead(head: T | null) {
+    this.head = head;
+    this.event.emit('change-head', this);
+  }
+
+  _dangerSetTail(tail: T | null) {
+    this.tail = tail;
+    this.event.emit('change-tail', this);
+  }
+
+  _dangerSetSize(size: number) {
+    this.size = size;
+    this.event.emit('change-size', this.size, this);
+  }
+
+  prepend(item: T) {
     if (!item) {
       return false;
     }
@@ -46,9 +70,11 @@ export class List<T extends Item = Item> {
     }
 
     item.detach();
-    item.list = this;
-    this.head = item as T;
-    this.size++;
+    item._dangerSetList(this);
+    this._dangerSetHead(item);
+    this._dangerSetSize(this.size + 1);
+
+    this.event.emit('prepend', item, this.head, this);
 
     return item;
   }
@@ -73,9 +99,11 @@ export class List<T extends Item = Item> {
     }
 
     item.detach();
-    item.list = this;
-    this.head = item;
-    this.size++;
+    item._dangerSetList(this);
+    this._dangerSetHead(item);
+    this._dangerSetSize(this.size + 1);
+
+    this.event.emit('append', item, this.tail, this);
 
     return item;
   }

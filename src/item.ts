@@ -1,9 +1,34 @@
+import { EventEmitter } from '@aintts/event-emitter';
 import { List } from './list';
 
 export class Item {
   public list: List | null = null;
   public next: Item | null = null;
   public prev: Item | null = null;
+
+  public event = new EventEmitter<{
+    append: (item: Item | null) => void;
+    prepend: (item: Item | null) => void;
+    detach: (item: Item | null) => void;
+    'change-prev': (item: Item | null) => void;
+    'change-next': (item: Item | null) => void;
+    'change-list': (list: List | null, item: Item) => void;
+  }>([]);
+
+  _dangerSetPrev(prev: Item | null) {
+    this.prev = prev;
+    this.event.emit('change-prev', this);
+  }
+
+  _dangerSetNext(next: Item | null) {
+    this.next = next;
+    this.event.emit('change-next', this);
+  }
+
+  _dangerSetList(list: List | null) {
+    this.list = list;
+    this.event.emit('change-list', this.list, this);
+  }
 
   prepend(item: Item) {
     const list = this.list;
@@ -21,23 +46,25 @@ export class Item {
     item.detach();
 
     if (this.prev) {
-      item.prev = this.prev;
-      this.prev.next = item;
+      item._dangerSetPrev(this.prev);
+      this.prev._dangerSetNext(item);
     }
 
-    item.next = this;
-    item.list = list;
-    this.prev = item;
+    item._dangerSetNext(this);
+    item._dangerSetList(list);
+    this._dangerSetPrev(item);
 
     if (this === list.head) {
-      list.head = item;
+      list._dangerSetHead(item);
     }
 
     if (!list.tail) {
-      list.tail = this;
+      list._dangerSetTail(this);
     }
 
-    list.size++;
+    list._dangerSetSize(list.size + 1);
+
+    this.event.emit('prepend', this);
 
     return item;
   }
@@ -58,19 +85,21 @@ export class Item {
     item.detach();
 
     if (this.next) {
-      item.next = this.next;
-      this.next.prev = item;
+      item._dangerSetNext(this.next);
+      this.next._dangerSetPrev(item);
     }
 
-    item.prev = this;
-    item.list = list;
-    this.next = item;
+    item._dangerSetPrev(this);
+    item._dangerSetList(list);
+    this._dangerSetNext(item);
 
     if (this === list.tail || !list.tail) {
-      list.tail = item;
+      list._dangerSetTail(item);
     }
 
-    list.size++;
+    list._dangerSetSize(list.size + 1);
+
+    this.event.emit('append', this);
 
     return item;
   }
@@ -83,15 +112,15 @@ export class Item {
     }
 
     if (list.tail === this) {
-      list.tail = this.prev;
+      list._dangerSetTail(this.prev);
     }
 
     if (list.head === this) {
-      list.head = this.next;
+      list._dangerSetHead(this.next);
     }
 
     if (list.tail === list.head) {
-      list.tail = null;
+      list._dangerSetTail(null);
     }
 
     if (this.prev) {
@@ -99,11 +128,15 @@ export class Item {
     }
 
     if (this.next) {
-      this.next.prev = this.prev;
+      this.next._dangerSetPrev(this.prev);
     }
 
-    this.prev = this.next = this.list = null;
-    list.size--;
+    this._dangerSetPrev(null);
+    this._dangerSetNext(null);
+    this._dangerSetList(null);
+    list._dangerSetSize(list.size - 1);
+
+    this.event.emit('detach', this);
 
     return this;
   }

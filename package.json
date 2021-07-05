@@ -70,5 +70,8 @@
       "path": "dist/linked-list.esm.js",
       "limit": "1 KB"
     }
-  ]
+  ],
+  "dependencies": {
+    "@aintts/event-emitter": "^0.1.3"
+  }
 }
